@@ -1,0 +1,5 @@
+-- 
+nasm -f bin boot_v5.asm -o boot_v5.bin
+
+-- 
+qemu-system-i386 boot_v5.bin
