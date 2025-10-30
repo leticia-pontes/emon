@@ -1,0 +1,30 @@
+name: Testar Boot Sector i386
+
+on: [push, pull_request]
+
+jobs:
+  test-bootloader:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Código
+      uses: actions/checkout@v4
+
+    - name: Instalar NASM e QEMU
+      run: |
+        sudo apt-get update
+        sudo apt-get install nasm qemu-system-x86 -y # qemu-system-x86 inclui o i386
+
+    - name: Montar Assembly
+      run: nasm -f bin boot/boot_v9.asm -o boot/boot_v9.bin
+      
+    - name: Testar a Execução no QEMU
+      run: |
+        qemu-system-i386 -nographic -serial stdio boot/boot_v9.bin &
+        QEMU_PID=$!
+        sleep 5
+        kill $QEMU_PID || true
+        echo "QEMU executado. Verifique os logs para ver a saída do serial/console."
+      # 1. Fazer o Assembly escrever um valor conhecido em um registrador ou porta de E/S.
+      # 2. Usar o QEMU no modo GDB (-s -S) e um script Python/expect para conectar,
+      #    verificar o estado do registrador/memória e forçar a saída.
