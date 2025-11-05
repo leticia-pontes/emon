@@ -10,10 +10,10 @@ CALL IMPRIME
 CALL MUDAR_PARA_MODO_PROTEGIDO
 JMP $
 
-%INCLUDE "boot/imprime.asm"
-%INCLUDE "boot/gdt32.asm"
-%INCLUDE "boot/imprime32.asm"
-%INCLUDE "boot/modo32.asm"
+%INCLUDE "imprime.asm"
+%INCLUDE "gdt32.asm"
+%INCLUDE "imprime32.asm"
+%INCLUDE "modo32.asm"
 
 INICIO_MP:
     MOV EBX, MENSAGEM_MODO_PROTEGIDO
