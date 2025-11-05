@@ -15,6 +15,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install nasm qemu-system-x86 -y # qemu-system-x86 inclui o i386
 
+    - name: Mudar para a pasta boot/
+      run: cd boot
+    
     - name: Montar Assembly
       run: nasm -f bin boot/boot_v9.asm -o boot/boot_v9.bin
       
