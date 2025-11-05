@@ -19,15 +19,12 @@ jobs:
       run: cd boot
     
     - name: Montar Assembly
-      run: nasm -f bin boot/boot_v9.asm -o boot/boot_v9.bin
+      run: nasm -f bin boot_v9.asm -o boot_v9.bin
       
     - name: Testar a Execução no QEMU
       run: |
-        qemu-system-i386 -nographic -serial stdio boot/boot_v9.bin &
+        qemu-system-i386 -nographic -serial stdio boot_v9.bin &
         QEMU_PID=$!
         sleep 5
         kill $QEMU_PID || true
         echo "QEMU executado. Verifique os logs para ver a saída do serial/console."
-      # 1. Fazer o Assembly escrever um valor conhecido em um registrador ou porta de E/S.
-      # 2. Usar o QEMU no modo GDB (-s -S) e um script Python/expect para conectar,
-      #    verificar o estado do registrador/memória e forçar a saída.
