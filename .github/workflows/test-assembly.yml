@@ -14,12 +14,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install nasm qemu-system-x86 -y # qemu-system-x86 inclui o i386
-
-    - name: Mudar para a pasta boot/
-      run: cd boot
     
     - name: Montar Assembly
       run: nasm -f bin boot_v9.asm -o boot_v9.bin
+      working-directory: ./boot
       
     - name: Testar a Execução no QEMU
       run: |
@@ -28,3 +26,4 @@ jobs:
         sleep 5
         kill $QEMU_PID || true
         echo "QEMU executado. Verifique os logs para ver a saída do serial/console."
+      working-directory: ./boot
