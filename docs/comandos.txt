@@ -1,0 +1,16 @@
+# ASSEMBLY
+
+-- Montar o Assembly
+nasm -f bin boot_v5.asm -o boot_v5.bin
+
+-- Executar o binário
+qemu-system-i386 boot_v5.bin
+
+
+# C
+
+-- Compilação de arquivo objeto
+gcc -ffreestanding -c test1.c -o test1.o
+
+-- Mostra o conteúdo do arquivo objeto
+objdump -M intel -d test1.o
