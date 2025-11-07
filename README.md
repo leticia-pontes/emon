@@ -19,7 +19,7 @@ Objetivos do Projeto:
 
 ## ⚙️ Como Montar e Executar
 
-Para compilar e testar o Emon, você precisará ter o **NASM** e o **QEMU-system-x86** instalados em sua máquina (use uma **máquina virtual**).
+Para compilar e testar alguma versão do boot sector, você precisará ter o **NASM** e o **QEMU-system-x86** instalados em sua máquina (de preferência, use uma **máquina virtual**).
 
 ### Pré-requisitos
 
