@@ -1,3 +1,5 @@
+[![CI](https://github.com/leticia-pontes/emon/actions/workflows/test-assembly.yml/badge.svg)](https://github.com/leticia-pontes/emon/actions/workflows/test-assembly.yml)
+
 # Emon OS/Kernel
 
 Emon é um projeto de kernel de baixo nível (bare-metal) desenvolvido principalmente em **Assembly** e **C**, focado na arquitetura **i386 (32-bit)**.

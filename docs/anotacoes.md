@@ -30,7 +30,7 @@ Como? **Acessando diretamente uma parte da memória de vídeo!**
 		- Read/Write
 		- etc.
 
-### 29/0/2025
+### 29/10/2025
 **GDT (Global Descriptor Table)**
 
 - Cada entrada na GDT é composta de 8 bytes (64 bits), sendo:
@@ -49,3 +49,11 @@ Como? **Acessando diretamente uma parte da memória de vídeo!**
 - 1 bit: <u>32-bits</u> (1 = Sim)
 - 1 bit: <u>64-bits</u> (0 = Não)
 - 1 bit: <u>AVL</u> (0, uso livre)
+
+### 05/11/2025
+
+- O registrador AX/EAX é o mais popular, de uso genérico.
+- Relembrando ponteiros: O ponteiro é declarado com um * na frente do tipo (ex.: char*). O 'type* var' armazena o endereço referência para o valor. O valor em si está em '*var'.
+
+Perguntas:
+- Por que a variável 'memoria_de_video' no kernel.c é um ponteiro? Por que não armazenar um char simples?
