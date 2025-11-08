@@ -1,29 +1,39 @@
-name: Testar Boot Sector i386
+name: Testar Todas as Versões do Bootloader i386
 
 on: [push, pull_request]
 
 jobs:
-  test-bootloader:
+  test-bootloaders:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Código
       uses: actions/checkout@v4
 
-    - name: Instalar NASM e QEMU
+    - name: Instalar NASM, GCC e QEMU
       run: |
         sudo apt-get update
-        sudo apt-get install nasm qemu-system-x86 -y # qemu-system-x86 inclui o i386
-    
-    - name: Montar Assembly
-      run: nasm -f bin boot_v9.asm -o boot_v9.bin
-      working-directory: ./boot
-      
-    - name: Testar a Execução no QEMU
+        sudo apt-get install nasm gcc-multilib qemu-system-x86 -y
+
+    - name: Testar Todas as Versões do Bootloader
       run: |
-        qemu-system-i386 -nographic -serial stdio boot_v9.bin &
-        QEMU_PID=$!
-        sleep 5
-        kill $QEMU_PID || true
-        echo "QEMU executado. Verifique os logs para ver a saída do serial/console."
-      working-directory: ./boot
+        for boot in boot/boot_*.asm; do
+          echo "=== Testando $boot ==="
+          
+          # Monta o bootloader
+          nasm -f bin "$boot" -o boot.bin
+          
+          # Compila o kernel
+          gcc -m32 -ffreestanding -fno-pie -c kernel.c -o kernel.o
+          nasm -f elf kernel_entrada.asm -o kernel_entrada.o
+          ld -m elf_i386 -Ttext 0x1000 kernel_entrada.o kernel.o --oformat binary -o kernel.bin
+          
+          # Cria imagem bootável
+          cat boot.bin kernel.bin > imagem-so.bin
+          
+          # Roda no QEMU por alguns segundos
+          qemu-system-i386 -nographic -serial stdio imagem-so.bin &
+          QEMU_PID=$!
+          sleep 5
+          kill $QEMU_PID || true
+        done
