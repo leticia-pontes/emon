@@ -1,31 +1,30 @@
-; CÓDIGO PARA UMA "FUNÇÃO"DE IMPRESSÃO DE STRINGS USANDO A BIOS
-IMPRIME:
-    PUSHA ; "PUSH ALL": EMPILHA OS VALORES DE TODOS OS REGISTRADORES
+; código para uma função de impressão de strings
+imprime:
+    pusha ; push all = empilha os valores de todos os registradores
 
-INICIO:
-    MOV AL, [BX] ; ANTES DE CHAMAR A FUNÇÃO, COLOCAREMOS EM AL O ENDEREÇO DA STRING (EM BX) A SER IMPRESSA
-    ; A INSTRUÇÃO ACIMA COLOCARÁ NO AL O VALOR DO PRIMEIO CARACTERE NO ENDEREÇO DA STRING
+inicio:
+    mov al, [bx] ; bx vai conter o endereço para o começo da string
+    cmp al, 0 ; verifica se é o valor terminador da string (zero)
+    je fim ; je = jump if equal. pula para "fim" se for zero
+           ; se não for, segue
     
-    CMP AL, 0 ; COMPARAMOS O VALOR DO CARACTERE EM AL COM 0
-    JE FIM ; SE FOR 0, A STRING TERMINOU. SALTAMOS PARA "FIM"
-           ; SE NÃO FOR 0, O PROGRAMA SEGUE PARA A PRÓXIMA INSTRUÇÃO
+    mov ah, 0x0e
+    int 0x10
 
-    MOV AH, 0x0E
-    INT 0x10
+    add bx, 1 ; incrementa o "ponteiro" do caractere atual da string
+    jmp inicio ; volta ao inicio (loop)
 
-    ADD BX, 1 ; ADICIONA 1 AO ENDEREÇO ARMAZENADO EM BX DE FORMA QUE AGORA ELE APONTA PARA O CARACTERE SEGUINTE NA STRING
-    JMP INICIO ; "LOOP" QUE VOLTA AO INÍCIO PARA CONTINUAR IMPRIMINDO OS DEMAIS CARACTERES
+fim:
+    popa ; pop all = desempilha os valores de todos os registradores
+    ret
 
-FIM:
-    POPA ; "POP ALL": DESEMPILHA E "DEVOLVE" OS VALORES A TODOS OS REGISTRADORES
-    RET ; ENCERRA A "FUNÇÃO" E RETORNA AO PONTO DE ONDE FOI CHAMADA
+imprime_quebra:
+    pusha
+    mov ah, 0x0e
+    mov al, 0x0a ; quebra de linha (line feed)
+    int 0x10
+    mov al, 0x0d ; retorno do cursor (carriage return)
+    int 0x10
+    popa
+    ret
 
-IMPRIME_QUEBRA:
-    PUSHA
-    MOV AH, 0x0E
-    MOV AL, 0x0A ; HEXADECIMAL DA QUEBRA DE LINHA
-    INT 0x10
-    MOV AL, 0x0D ; RETORNO DO CURSOR (CARRIAGE RETURN)
-    INT 0x10
-    POPA
-    RET
