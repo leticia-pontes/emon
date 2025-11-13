@@ -1,53 +1,55 @@
-; RECEBEMOS O VALOR A SER IMPRESSO NO REGISTRADOR DX
-; SUPONHA QUE DX = 0x1234
+; recebemos o valor a ser impresso no registrador DX
+; suponha que DX = 0x1234
 
-IMPRIME_HEXA:
-    PUSHA
-    MOV CX, 0 ; SERVIRÁ COMO UM "ÍNDICE/CONTADOR"
+imprime_hexa:
+    pusha
+    mov cx, 0 ; servirá como um "índice/contador"
 
-; ESTRATÉGIA: OBTER O ÚLTIMO NÚMERO EM DX E CONVERTÊ-LO PARA ASCII
-; NA TABELA ASCII '0' É 0x30 E '9' É 0x39 ENTÃO PARA VALORES
-; ENTRE 0 E 9 BASTA SOMAR 0x30 QUE OBTEREMOS O EQUIVALENTE EM ASCII.
-; JÁ PARA OS VALORES ALFABÉTICOS (A-F) 'A' É 0x41 E 'F' É 0x46.
-; ENTÃO NESTES CASOS DEVEREMOS SOMAR 7 AO VALOR.
-; EM SEGUIDA, COPIAREMOS O VALOR RESULTANTE PARA UMA POSIÇÃO NA
-; STRING DE DESTINO
+; estratégia: obter o último número em DX e convertê-lo para ASCII
+; na tabela ASCII '0' é 0x30 e '9' é 0x39 então para valores
+; entre 0 e 9 basta somar 0x30 que obteremos o equivalente em ASCII.
+; já para os valores alfabéticos (A-F) 'A' é 0x41 e 'F' é 0x46.
+; então nestes casos deveremos somar 7 ao valor.
+; em seguida, copiaremos o valor resultante para uma posição na
+; string de destino
+hexa_loop:
+    cmp cx, 4 ; repetiremos 4 vezes (uma vez para cada número hexa)
+    je fim2 ; se igual a 4 já "convertemos" todos e podemos encerrar    
 
-HEXA_LOOP:
-    CMP CX, 4 ; REPETIREMOS 4 VEZES (UMA VEZ PARA CADA NÚMERO HEXA)
-    JE FIM2 ; SE IGUAL A 4 JÁ "CONVERTEMOS" TODOS E PODEMOS ENCERRAR    
+    ; 1. converte o último número em DX no seu equivalente ASCII
+    mov ax, dx ; copiamos o valor original para ax
+    and ax, 0x000f ; fazemos um AND bit a bit em AX. assim, só
+    ; vai "sobrar" nele o último número
+    add al, 0x30 ; adicionamos 0x30 ao valor para obter seu ASCII
+    ; porém, e se ele for maior que 9 (A, B, C, D, E ou F)???
+    cmp al, 0x39
+    jle passo2 ; jle: jump if less or equal (vai ao passo2)
+    add al, 7 ; se não saltou, o dígito é algum de A a F
+    ; então acresentemos 7 ao valor em al para chegar
+    ; ao ASCII correspondente ('A' a 'F') 
 
-    ; 1. CONVERTE O ÚLTIMO NÚMERO EM DX NO SEU EQUIVALENTE ASCII
-    MOV AX, DX ; COPIAMOS O VALOR ORIGINAL PARA AX
-    AND AX, 0x000F ; FAZEMOS UM AND BIT A BIT EM AX. ASSIM, SÓ VAI "SOBRAR" NELE O ÚLTIMO NÚMERO
-    ADD AL, 0x30 ; ADICIONAMOS 0x30 AO VALOR PARA OBTER SEU ASCII. PORÉM, E SE ELE FOR MAIOR QUE 9 (A, B, C, D, E OU F)???
-    CMP AL, 0x39
-    JLE PASSO2 ; JLE: JUMP IF LESS OR EQUAL (VAI AO PASSO2)
-    ADD AL, 7 ; SE NÃO SALTOU, O DÍGITO É ALGUM DE A A F, ENTÃO ACRESENTEMOS 7 AO VALOR EM AL PARA CHEGAR AO ASCII CORRESPONDENTE ('A' A 'F')
+passo2:
+    ; 2. obter a posição da string que conterá o valor hexa
+    ; convertido.
+    mov bx, HEX_OUT + 5
+    sub bx, cx ; variável índice
+    mov [bx], al ; copia o valor ASCII em al para a posição em bx
+    ror dx, 4 ; rotaciona o valor em dx por quatro bits
+    ; antes do ror: 0x1234
+    ; depois do primeiro ror: 0x4123
+    ; depois do segundo ror (próximo loop): 0x3412
+    ; depois do terceiro ror (depois do segundo loop): 0x2341
+    ; depois do último ror (último loop): 0x1234
+    add cx, 1 ; incrementa o contador
+    jmp hexa_loop ; volta o loop
 
-PASSO2:
-    ; 2. OBTER A POSIÇÃO DA STRING QUE CONTERÁ O VALOR HEXA CONVERTIDO.
-    MOV BX, HEX_OUT + 5
-    SUB BX, CX ; VARIÁVEL ÍNDICE
-    MOV [BX], AL ; COPIA O VALOR ASCII EM AL PARA A POSIÇÃO EM BX
-    ROR DX, 4 ; ROTACIONA O VALOR EM DX POR QUATRO BITS
-    ; ANTES DO ROR: 0x1234
-    ; DEPOIS DO PRIMEIRO ROR: 0x4123
-    ; DEPOIS DO SEGUNDO ROR (PRÓXIMO LOOP): 0x3412
-    ; DEPOIS DO TERCEIRO ROR (DEPOIS DO SEGUNDO LOOP): 0x2341
-    ; DEPOIS DO ÚLTIMO ROR (ÚLTIMO LOOP): 0x1234
-    ADD CX, 1 ; INCREMENTA O CONTADOR
-    JMP HEXA_LOOP ; VOLTA O LOOP
+fim2:    ; terminamos a "conversão"
+    mov bx, HEX_OUT
+    call imprime
 
-%INCLUDE "imprime.asm"
-
-FIM2:    ; TERMINAMOS A "CONVERSÃO"
-    MOV BX, HEX_OUT
-    CALL IMPRIME
-
-    POPA
-    RET
+    popa
+    ret
 
 HEX_OUT:
-    DB '0x0000', 0  ; ESPAÇO NA MEMÓRIA ONDE FICARÁ A
-    ; STRING COM OS DÍGITOS HEXA
+    db '0x0000', 0  ; espaço na memória onde ficará a
+    ; string com os dígitos hexa

@@ -1,28 +1,35 @@
-; FUNÇÃO PARA IMPRESSÃO NA TELA EM MODO PROTEGIDO (32 BITS)
-[BITS 32] ; INDICA QUE O CÓDIGO SERÁ ESCRITO E EXECUTADO EM MODO 32 BITS
+; função para impressão na tela em modo protegido (32 bits)
+[bits 32] ; indica que o código será escrito e executado em modo 32 bits
 
-; NOVIDADE: CONSTANTES EM ASSEMBLY!
-MEMORIA_DE_VIDEO    EQU   0xB8000 ; ENDEREÇO DA MEMÓRIA DE VIDEO MODO TEXTO
-BRANCO_EM_PRETO     EQU   0x0F    ; VALOR HEXA PARA TEXTO BRANCO NO FUNDO PRETO
-VERMELHO_EM_PRETO   EQU   0x0C
-VERDE_EM_PRETO      EQU   0x0D ; TALVEZ
+; novidade: constantes em assembly!
+MEMORIA_DE_VIDEO    equ     0xb8000  ; endereço da memória de video modo texto
+BRANCO_EM_PRETO     equ     0x0f ; valor hexa para texto branco no fundo preto
+VERMELHO_EM_PRETO   equ     0x0c 
 
-IMPRIME_MP: ; IMPRIME EM MODO PROTEGIDO
-    PUSHA
-    MOV EDX, MEMORIA_DE_VIDEO ; EDX É O DX COM 32 BITS DE TAMANHO
+imprime_mp:     ; imprime em modo protegido
+    pusha
+    mov edx, MEMORIA_DE_VIDEO ; EDX é o DX com 32 bits de tamanho
 
-IMPRIME_MP_LOOP:
-    MOV AL, [EBX] ; EBX CONTÉM O ENDEREÇO DO CARACTERE A SER IMPRESSO
-    MOV AH, BRANCO_EM_PRETO ; HEXA PARA COR
+imprime_mp_loop:
+    mov al, [ebx] ; EBX contém o endereço do caractere a ser impresso
+    mov ah, BRANCO_EM_PRETO ; hexa para cor
 
-    CMP AL, 0 ; COMPARAÇÃO PARA VERIFICAR SE CHEGAMOS AO FINAL DA STRING
-    JE IMPRIME_MP_FIM ; SE CHEGAMOS A FINAL, SALTA PARA "IMPRIME_MP_FIM". SE NÃO TERMINOU, CONTINUA...
+    cmp al, 0 ; comparação para verificar se chegamos ao final da string
+    je imprime_mp_fim ; se chegamos a final, salta para "imprime_mp_fim"
+    ; se não terminou, continua...
 
-    MOV [EDX], AX ; ARMAZENA NA POSIÇÃO DE MEMÓRIA EM EDX O CARACTERE E O CÓDIGO DE COR DESEJADO
-    ADD EBX, 1 ; AVANÇA PARA O PRÓXIMO CARACTERE
-    ADD EDX, 2 ; AVANÇA PARA A PRÓXIMA POSIÇÃO DA MEMÓRIA DE VÍDEO
-    JMP IMPRIME_MP_LOOP ; REPETE O LAÇO
+    mov [edx], ax ; armazena na posição de memória em EDX o caractere e
+                  ; o código de cor desejado
+    add ebx, 1 ; avança para o próximo caractere
+    add edx, 2 ; avança para a próxima posição da memória de vídeo
+    jmp imprime_mp_loop ; repete o laço
 
-IMPRIME_MP_FIM: ; CHEGOU AO FIM
-    POPA
-    RET
+imprime_mp_fim: ; chegou ao fim
+    popa
+    ret
+    
+                      
+
+
+
+

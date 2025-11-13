@@ -1,46 +1,43 @@
-; IMPLEMENTAÇÃO DA GDT (GLOBAL DESCRIPTOR TABLE)
-GDT_INICIO:
-    ; A GDT DEVE COMEÇAR COM 8 BYTES (64 BITS) NULOS
-    DD 0x0 ; DD: DEFINE DOUBLE (ARMAZENA UM VALOR DE 32 BITS)
-    DD 0x0
+; implementação da GDT (Global Descriptor Table)
+gdt_inicio:
+    ; a GDT deve começar com 8 bytes nulos (64 bits)
+    dd 0x0  ; dd = define double, armazena uma valo de 32 bits
+    dd 0x0
 
-; GDT PARA O SEGMENTO DE CÓDIGO
-; ENDEREÇO BASE: 0X0
-; LIMITE: 0xFFFF
-; REFERÊNCIA ASSEMBLY!
-; DB (DEFINE BYTE) ARMAZENA UM BYTE (8 BITS)
-; DW (DEFINE WORD) ARMAZENA DOIS BYTES (16 BITS)
-; DD (DEFINE DOUBLE) ARMAZENA QUATRO BYTES (32 BITS)
-; DQ (DEFINE QUAD) ARMAZENA OITO BYTES (64 BITS)
+; GDT para o segmento de código
+; endereço base: 0x0
+; limite: 0xffff
+; db (define byte) 8 bits
+; dw (define word) 16 bits
+; dd (define double) 32 bits
+; dq (define quad) 64 bits
+gdt_codigo:
+    dw 0xffff ; limite (tamanho do segmento) bits 0 - 15
+    dw 0x0 ; parte do endereço base do segmento: bits 0 - 15
+    db 0x0 ; segunda parte do endereço base: bits 16 - 23
+    ; primeira sequência de flags: (presente)1 (privilégio)00 (tipo)1
+    ; (código)1 (conformidade)0 (legibilidade)1 (acessada)0
+    db 10011010b ; o "b" indicar valor binário
+    ; segunda sequência de flags: (granularidade)1 (32-bits)1
+    ; (64-bits)0 (avl)0 (restante do tamanho/limite do segmento)1111
+    db 11001111b
+    db 0x0 ; restante do endereço base (bits 24 - 31)
 
-; ENTRADA NA GDT PARA O SEGMENTO DE CÓDIGO
-GDT_CODIGO:
-    DW 0xFFFF ; PRIMEIRA PARTE DO LIMITE (TAMANHO): BITS 0 - 15
-    DW 0x0 ; PRIMEIRA PARTE DO ENDEREÇO BASE: BITS 0 - 15
-    DB 0x0 ; SEGUNDA PARTE DO ENDEREÇO BASE: BITS 16 - 23
+; segmento de dados (basicamente o mesmo)
+gdt_dados:
+    dw 0xffff
+    dw 0x0
+    db 0x0
+    db 10010010b
+    db 11001111b
+    db 0x0
 
-    ; PRIMEIRA SEQUÊNCIA DE FLAGS: PRESENTE(1) PRIVILÉGIO(00) TIPO(1) CÓDIGO(1) CONFORMIDADE(0) LEITURA(1) ACESSADO(0)
-    DB 10011010b ; O "b" NO FINAL INDICA VALOR BINÁRIO
+gdt_fim:
 
-    ; SEGUNDA SEQUÊNCIA DE FLAGS: GRANULARIDADE(1) 32-BITS(1) 64-BITS(0) AVL(0) E O RESTANTE DO LIMITE/TAMANHO(1111)
-    DB 11001111b
-    DB 0x0 ; ÚLTIMA PARTE DO ENDEREÇO BASE (BITS 24 - 31)
+gdt_descritor:
+    dw gdt_fim - gdt_inicio - 1
+    dd gdt_inicio
 
-; ENTRADA NA GDT PARA O SEGMENTO DE DADOS. PARA SIMPLIFICAR, ELE FICARÁ UNIFICADO COM O SEGMENTO DE CÓDIGO
-GDT_DADOS:
-    DW 0xFFFF
-    DW 0x0
-    DB 0x0
-    DB 10010010b ; ÚNICA DIFERENÇA: QUINTO BIT É 0 (SEGMENTO DE DADOS)
-    DB 11001111b
-    DB 0x0
-
-GDT_FIM:
-
-GDT_DESCRITOR:
-    DW GDT_FIM - GDT_INICIO - 1
-    DD GDT_INICIO
-
-; CONSTANTES QUE SERÃO USADAS POSTERIORMENTE
-SEGMENTO_CODIGO EQU GDT_CODIGO - GDT_INICIO
-SEGMENTO_DADOS EQU GDT_DADOS - GDT_INICIO
+; constantes que serão usadas posteriormente
+SEGMENTO_CODIGO equ gdt_codigo - gdt_inicio
+SEGMENTO_DADOS equ gdt_dados - gdt_inicio

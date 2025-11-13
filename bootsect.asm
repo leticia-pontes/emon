@@ -1,59 +1,61 @@
-; BOOT SECTOR DO SISTEMA OPERACIONAL EMON 0.0.0.0.1
-[ORG 0x7C00]
+; Boot sector do Sistema Operacional UNimarIX 0.0.0.0.1
+[org 0x7c00]
 
-; CONSTANTE COM O ENDEREÇO DA POSIÇÃO ONDE O KERNEL SERÁ COLOCADO NA MEMÓRIA
-ENDERECO_KERNEL EQU 0x1000
+; constante com o endereço da posição onde o kernel será
+; colocado na memória
+ENDERECO_KERNEL equ 0x1000 
 
-; SALVAMOS O IDENTIFICADOR DO DISPOSITIVO DE INICIALIZAÇÃO NA MEMÓRIA
-MOV [DRIVE_BOOT], DL
-; PREPARAMOS A PILHA DO SETOR DE BOOT
-MOV BP, 0x9000 ; A BASE DA PILHA FICARÁ NO ENDEREÇO 0x9000
-MOV SP, BP ; A PILHA COMEÇA COM SEU TOPO APONTANDO PARA A SUA BASE
+; salvamos o identificador do dispositivo de inicialização
+; na memória
+mov [DRIVE_BOOT], dl 
+; preparamos a pilha do setor de boot
+mov bp, 0x9000 ; a base da pilha ficará no endereço 0x9000
+mov sp, bp ; a pilha começa com seu topo apontando para a sua base
 
-; COMEÇAMOS EM MODO REAL 16 BITS
-MOV BX, MENSAGEM_REAL_MODE
-CALL IMPRIME
-CALL IMPRIME_QUEBRA
+; começamos em modo real 16 bits
+mov bx, MENSAGEM_REAL_MODE
+call imprime
+call imprime_quebra
 
-CALL CARREGAR_KERNEL ; FUNÇÃO DEFINIDA MAIS ABAIXO
-CALL MUDAR_PARA_MODO_PROTEGIDO ; FUNÇÃO NO ARQUIVO modo32.asm
-JMP $
+call carregar_kernel ; função definida mais abaixo
+call mudar_para_modo_protegido ; função no arquivo modo32.asm
+jmp $
 
-; INCLUÍMOS OS DEMAIS ARQUIVOS NECESSÁRIOS
-; %INCLUDE "imprime.asm"
-; %INCLUDE "imprime_hexa.asm"
-%INCLUDE "ler_disco.asm"
-%INCLUDE "gdt32.asm"
-%INCLUDE "imprime32.asm"
-%INCLUDE "modo32.asm"
+; incluimos os demais arquivos necessários
+%include "imprime.asm"
+%include "imprime_hexa.asm"
+%include "ler_disco.asm"
+%include "gdt32.asm"
+%include "imprime32.asm"
+%include "modo32.asm"
 
-[BITS 16]
-CARREGAR_KERNEL:
-    ; LEREMOS O KERNEL NO DISCO USANDO A FUNÇÃO ler_disco.asm
-    MOV BX, MENSAGEM_KERNEL
-    CALL IMPRIME
-    CALL IMPRIME_QUEBRA
+[bits 16]
+carregar_kernel:
+    ; leremos o kernel no disco usando a função ler_disco.asm
+    mov bx, MENSAGEM_KERNEL
+    call imprime
+    call imprime_quebra
 
-    ; COLOCA O KERNEL LIDO NA POSIÇÃO CORRETA DA MEMÓRIA
-    MOV BX, ENDERECO_KERNEL
-    MOV DH, 2 ; A QUANTIDADE DE SETORES A SEREM LIDOS NO 
-    MOV DL, [DRIVE_BOOT]
-    CALL LER_DISCO
-    RET
+    ; coloca o kernel lido na posição correta da memória
+    mov bx, ENDERECO_KERNEL
+    mov dh, 17 ; quantidade de setores a serem lidos no disco
+    mov dl, [DRIVE_BOOT]
+    call ler_disco
+    ret
 
-[BITS 32]
+[bits 32]
 INICIAR_MP:
-    ; MUDANÇA PARA 32 BITS (MODO PROTEGIDO)
-    MOV EBX, MENSAGEM_PROTECTED
-    CALL IMPRIME_MP
-    CALL ENDERECO_KERNEL ; PASSAMOS O CONTROLE AO KERNEL
-    JMP $
+    ; mudança para 32 bits (modo protegido)
+    mov ebx, MENSAGEM_PROTECTED
+    call imprime_mp
+    call ENDERECO_KERNEL ; passamos o controle ao kernel
+    jmp $
 
-DRIVE_BOOT DB 0
-MENSAGEM_REAL_MODE DB "EMON INICIADO EM 16 BITS (MODO REAL)", 0
-MENSAGEM_PROTECTED DB "EMON EM 32 BITS (MODO PROTEGIDO)", 0
-MENSAGEM_KERNEL DB "CARREGANDO O KERNEL NA MEMORIA...", 0
+DRIVE_BOOT db 0
+MENSAGEM_REAL_MODE db "UNimarIX iniciado em 16 bits (modo real)",0
+MENSAGEM_PROTECTED db "UNimarIX em 32 bits (modo protegido)",0
+MENSAGEM_KERNEL db "Carregando o kernel na memoria...",0
 
-; FINAL DO BOOT SECTOR
-TIMES 510-($-$$) DB 0
-DW 0xAA55
+; final do boot sector
+times 510-($-$$) db 0
+dw 0xaa55

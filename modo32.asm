@@ -1,28 +1,27 @@
-; PROCEDIMENTOS PARA ENTRAR EM MODO PROTEGIDO (32-BITS)
-; COMEÇAMOS EM MODO REAL (16 BITS)
-[BITS 16]
-MUDAR_PARA_MODO_PROTEGIDO:
-    CLI ; COMEÇAMOS DESABILITANDO AS INTERRUPÇÕES DO PROCESSADOR
-    ; ESTE COMANDO "CARREGA" A GDT NO PROCESSADOR
-    ; PARA ALTERNAR PARA MODO PROTEGIDO DEVEMOS SETAR UM BIT NO REGISTRADOR CR0
-    LGDT [GDT_DESCRITOR]
-    MOV EAX, CR0
-    OR EAX, 0X1
-    MOV CR0, EAX
-    JMP SEGMENTO_CODIGO:INICIAR_MODO_PROTEGIDO
+; procedimentos para entrar em modo protegido (32-bits)
+; começamos em modo real (16 bits)
+[bits 16]
+mudar_para_modo_protegido:
+    cli ; começamos desabilitando as interrupções do processador
+    lgdt [gdt_descritor] ; este comando "carrega" a GDT no processador
+    ; para alternar para modo protegido devemos setar um bit no registrador CR0
+    mov eax, cr0
+    or eax, 0x1
+    mov cr0, eax
+    jmp SEGMENTO_CODIGO:iniciar_modo_protegido
 
-; MUDAMOS PARA MODO PROTEGIDO (32 BITS)
-[BITS 32]
-INICIAR_MODO_PROTEGIDO:
-    MOV AX, SEGMENTO_DADOS
-    ; ATUALIZAMOS OS REGISTRADORES DE SEGMENTO
-    MOV DS, AX
-    MOV SS, AX
-    MOV ES, AX
-    MOV FS, AX
-    MOV GS, AX
+; mudamos para modo protegido (32 bits)
+[bits 32]
+iniciar_modo_protegido:
+    mov ax, SEGMENTO_DADOS
+    ; atualizamos os registradores de segmento
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
     
-	MOV EBP, 0X90000 ; ATUALIZA O ENDEREÇO DA PILHA
-    MOV ESP, EBP
+	mov ebp, 0x90000 ; Atualiza o endereço da pilha
+    mov esp, ebp
 
-    CALL INICIAR_MP
+    call INICIAR_MP

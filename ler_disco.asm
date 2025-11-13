@@ -1,43 +1,46 @@
-; FUNÇÃO PARA LEITURA D "N" SETORES DE UMA UNIDADE DE ARMAZENAMENTO.
-; A QUANTIDADE DE SETORES A SER LIDA DEVERÁ SER COLOCADA ANTES DE CHAMAR A FUNÇÃO NO REGISTRADOR DH.
-; O NÚMERO DA UNIDADE DE ARMAZENAMENTO A SER LIDA DEVERÁ TER SIDO COLOCADO EM DL. 
-; OS SETORES LIDOS FICARÃO DISPONÍVEIS NA MEMÓRIA NO ENDEREÇO ES:BX
+; função para leitura d "n" setores de uma unidade de
+; armazenamento. a quantidade de setores a ser lida deverá
+; ser colocada antes de chamar a função no registrador DH.
+; o número da unidade de armazenamento a ser lida deverá ter
+; sido colocado em DL. os setores lidos ficarão disponíveis
+; na memória no endereço ES:BX
+ler_disco:
+    pusha
+    push dx 
+    mov ah, 0x02 ; função 2 da bios (leitura)
+    mov al, dh ; copiamos para al a quantidade de setores
+    ; a ser lida
+    mov cl, 0x02 ; número do setor a ser lido (0x01 é o boot)
+    mov ch, 0x00 ; número do cilindro (0x00)
+    ; DL já deve conter o código da unidade, sendo:
+    ; 0: disquete A   1: disquete B   0x80: HD1 (C:)  0x81: HD2 (D:)
+    mov dh, 0x00 ; número da cabeça
+    ; [es:bx] é o local da memória onde ficarão os dados lidos
+    int 0x13 ; interrupção 13h: serviços de disco da BIOS
+    jc erro_disco ; pule para erro_disco se gerou um "carry bit"
 
-LER_DISCO:
-    PUSHA
-    PUSH DX 
-    MOV AH, 0x02 ; FUNÇÃO 2 DA BIOS (LEITURA)
-    MOV AL, DH ; COPIAMOS PARA AL A QUANTIDADE DE SETORES A SER LIDA
-    MOV CL, 0x02 ; NÚMERO DO SETOR A SER LIDO (0x01 É O BOOT)
-    MOV CH, 0x00 ; NÚMERO DO CILINDRO (0x00)
-    ; DL JÁ DEVE CONTER O CÓDIGO DA UNIDADE, SENDO:
-    ; 0: DISQUETE A   1: DISQUETE B   0x80: HD1 (C:)  0x81: HD2 (D:)
-    MOV DH, 0x00 ; NÚMERO DA CABEÇA [ES:BX] É O LOCAL DA MEMÓRIA ONDE FICARÃO OS DADOS LIDOS
-    INT 0x13 ; INTERRUPÇÃO 13H: SERVIÇOS DE DISCO DA BIOS
-    JC ERRO_DISCO ; PULE PARA ERRO_DISCO SE GEROU UM "CARRY BIT"
+    pop dx
+    cmp al, dh ; verifica se a quantidade de setores lida está
+    jne erro_setor ; correta. se não (jump not equal) pula para
+               ; tratamento do erro
+    ; se não, encerra
+    popa
+    ret
 
-    POP DX
-    CMP AL, DH ; VERIFICA SE A QUANTIDADE DE SETORES LIDA ESTÁ
-    JNE ERRO_SETOR ; CORRETA. SE NÃO (JUMP NOT EQUAL) PULA PARA TRATAMENTO DO ERRO. SE NÃO, ENCERRA
-    POPA
-    RET
+erro_disco:
+    mov bx, MENSAGEM_ERRO_DISCO
+    call imprime
+    call imprime_quebra
+    mov dh, ah ; AH contém o código do erro
+    call imprime_hexa
+    jmp loop_disco
 
-%INCLUDE "imprime_hexa.asm"
+erro_setor:
+    mov bx, MENSAGEM_ERRO_SETOR
+    call imprime
 
-ERRO_DISCO:
-    MOV BX, MENSAGEM_ERRO_DISCO
-    CALL IMPRIME
-    CALL IMPRIME_QUEBRA
-    MOV DH, AH ; AH CONTÉM O CÓDIGO DO ERRO
-    CALL IMPRIME_HEXA
-    JMP LOOP_DISCO
+loop_disco:
+    jmp $
 
-ERRO_SETOR:
-    MOV BX, MENSAGEM_ERRO_SETOR
-    CALL IMPRIME
-
-LOOP_DISCO:
-    JMP $
-
-MENSAGEM_ERRO_DISCO: DB "ERRO NA LEITURA DO DISCO", 0
-MENSAGEM_ERRO_SETOR: DB "QTD. INCORRETA DE SETORES LIDOS", 0
+MENSAGEM_ERRO_DISCO: db "Erro na leitura do disco", 0
+MENSAGEM_ERRO_SETOR: db "Qtd. incorreta de setores lidos", 0
